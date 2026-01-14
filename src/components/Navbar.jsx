@@ -1,22 +1,18 @@
-import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    const loggedIn = localStorage.getItem('isLoggedIn');
+    setIsLoggedIn(!!loggedIn);
+  }, [location]);
 
   const isActive = (path) => {
     return location.pathname === path;
-  };
-
-  const handleGetStarted = () => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    if (isLoggedIn) {
-      navigate('/department');
-    } else {
-      navigate('/login');
-    }
   };
 
   return (
@@ -43,12 +39,21 @@ const Navbar = () => {
             >
               Home
             </Link>
-            <button 
-              onClick={handleGetStarted}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-            >
-              Get Started
-            </button>
+            {isLoggedIn ? (
+              <Link 
+                to="/profile"
+                className="bg-blue-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-700 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                Profile
+              </Link>
+            ) : (
+              <Link 
+                to="/login"
+                className="bg-blue-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-700 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                Login
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -79,12 +84,23 @@ const Navbar = () => {
               >
                 Home
               </Link>
-              <button 
-                onClick={() => { handleGetStarted(); setIsMenuOpen(false); }}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold text-center hover:bg-blue-700 transition-colors"
-              >
-                Get Started
-              </button>
+              {isLoggedIn ? (
+                <Link 
+                  to="/profile"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-blue-600 text-white px-8 py-3 rounded-full font-semibold text-center hover:bg-blue-700 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
+                  Profile
+                </Link>
+              ) : (
+                <Link 
+                  to="/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="bg-blue-600 text-white px-8 py-3 rounded-full font-semibold text-center hover:bg-blue-700 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
+                  Login
+                </Link>
+              )}
             </div>
           </div>
         )}
