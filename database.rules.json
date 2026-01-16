@@ -11,6 +11,12 @@
         ".read": "auth != null && auth.uid == $userId",
         ".write": "auth != null && auth.uid == $userId"
       }
+    },
+    "resumes": {
+      "$userId": {
+        ".read": "auth != null && auth.uid == $userId",
+        ".write": "auth != null && auth.uid == $userId"
+      }
     }
   }
 }

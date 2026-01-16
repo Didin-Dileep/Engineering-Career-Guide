@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, Link, useNavigate } from 'react-router-dom';
 import { ref, set, get } from 'firebase/database';
 import { auth, database } from '../firebase';
+import { trackTopicStarted, trackTopicCompleted, trackQuizCompleted } from '../utils/analytics';
 
 export default function Learn() {
   const { topicId } = useParams();
@@ -196,6 +197,11 @@ export default function Learn() {
               setTotalTimeSpent(data.timeSpent || {});
               setQuizScore(data.quizScore !== undefined ? data.quizScore : null);
             }
+            
+            // Track topic started
+            if (topic) {
+              trackTopicStarted(topicId, topic.title);
+            }
             unsubscribe();
           }
         });
@@ -206,6 +212,11 @@ export default function Learn() {
           const data = snapshot.val();
           setTotalTimeSpent(data.timeSpent || {});
           setQuizScore(data.quizScore !== undefined ? data.quizScore : null);
+        }
+        
+        // Track topic started
+        if (topic) {
+          trackTopicStarted(topicId, topic.title);
         }
       }
     };
@@ -267,6 +278,12 @@ export default function Learn() {
       });
       
       console.log('✅ Saved!');
+      
+      // Track completion if 100%
+      if (progress === 100 && topic) {
+        const totalTime = Object.values(timeData).reduce((sum, time) => sum + time, 0);
+        trackTopicCompleted(topicId, topic.title, totalTime);
+      }
     } catch (error) {
       console.error('❌ Save error:', error);
     }
@@ -290,6 +307,9 @@ export default function Learn() {
     });
     setQuizScore(score);
     await saveProgress(totalTimeSpent, score);
+    
+    // Track quiz completion
+    trackQuizCompleted(topicId, score, quizQuestions.length);
   };
 
   if (!topic) {
@@ -427,3 +447,5 @@ export default function Learn() {
     </div>
   );
 }
+
+

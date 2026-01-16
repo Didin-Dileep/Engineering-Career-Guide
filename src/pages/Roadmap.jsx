@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ref, get } from 'firebase/database';
 import { auth, database } from '../firebase';
 import TopicCard from '../components/TopicCard';
+import CircularProgress from '../components/CircularProgress';
 
 export default function Roadmap() {
   const [searchParams] = useSearchParams();
@@ -398,6 +399,7 @@ export default function Roadmap() {
 
   const allTopics = year === '4' ? csFourthYearTopics : year === '3' ? csThirdYearTopics : year === '2' ? csSecondYearTopics : csFirstYearTopics;
   const [topics, setTopics] = useState(allTopics);
+  const [overallProgress, setOverallProgress] = useState(0);
 
   const loadProgress = async () => {
     try {
@@ -427,6 +429,11 @@ export default function Roadmap() {
         
         console.log('✅ Updated topics:', updatedTopics.map(t => `${t.id}:${t.progress}%`));
         setTopics(updatedTopics);
+        
+        // Calculate overall progress
+        const totalProgress = updatedTopics.reduce((sum, topic) => sum + topic.progress, 0);
+        const avgProgress = Math.round(totalProgress / updatedTopics.length);
+        setOverallProgress(avgProgress);
       }
     } catch (error) {
       console.error('❌ Load error:', error);
@@ -463,9 +470,21 @@ export default function Roadmap() {
           <h1 className="text-4xl font-bold text-blue-600 mb-4">
             Computer Science - Year {year || '1'} Roadmap
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 mb-6">
             Track your progress through essential CS topics
           </p>
+          
+          {/* Floating Circular Progress */}
+          <div className="flex justify-center mb-8">
+            <div className="relative">
+              <CircularProgress percentage={overallProgress} size={140} />
+              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                <p className="text-sm font-medium text-gray-600">
+                  {topics.filter(t => t.progress === 100).length}/{topics.length} completed
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -482,3 +501,5 @@ export default function Roadmap() {
     </div>
   );
 }
+
+
